@@ -32,6 +32,7 @@ DEPENDENCY_LINKS = [
 
 POSTGRESQL_REQUIRES = [
     'psycopg2>2.5',
+    'SQLAlchemy',  # Pooling
 ]
 
 MONITORING_REQUIRES = [
