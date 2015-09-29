@@ -43,32 +43,33 @@ class StorageBase(object):
         """
         raise NotImplementedError
 
-    def flush(self, auth=None):
+    def flush(self, request=None):
         """Remove **every** object from this storage.
+        :param request: Optional current request object.
+        :type request: :class:`~pyramid:pyramid.request.Request`
         """
         raise NotImplementedError
 
     def ping(self, request):
         """Test that storage is operationnal.
 
-        :param request: current request object
+        :param request: Optional current request object.
         :type request: :class:`~pyramid:pyramid.request.Request`
         :returns: ``True`` is everything is ok, ``False`` otherwise.
         :rtype: bool
         """
         try:
-            auth = request.headers.get('Authorization')
             if random.random() < _HEARTBEAT_DELETE_RATE:
                 self.delete_all(_HEARTBEAT_COLLECTION_ID, _HEART_PARENT_ID,
-                                auth=auth)
+                                request=request)
             else:
                 self.create(_HEARTBEAT_COLLECTION_ID, _HEART_PARENT_ID,
-                            _HEARTBEAT_RECORD, auth=auth)
+                            _HEARTBEAT_RECORD, request=request)
             return True
         except:
             return False
 
-    def collection_timestamp(self, collection_id, parent_id, auth=None):
+    def collection_timestamp(self, collection_id, parent_id, request=None):
         """Get the highest timestamp of every objects in this `collection_id` for
         this `parent_id`.
 
@@ -78,6 +79,8 @@ class StorageBase(object):
 
         :param str collection_id: the collection id.
         :param str parent_id: the collection parent.
+        :param request: Optional current request object.
+        :type request: :class:`~pyramid:pyramid.request.Request`
 
         :returns: the latest timestamp of the collection.
         :rtype: int
@@ -87,7 +90,7 @@ class StorageBase(object):
     def create(self, collection_id, parent_id, object, id_generator=None,
                unique_fields=None, id_field=DEFAULT_ID_FIELD,
                modified_field=DEFAULT_MODIFIED_FIELD,
-               auth=None):
+               request=None):
         """Create the specified `object` in this `collection_id` for this `parent_id`.
         Assign the id to the object, using the attribute
         :attr:`cliquet.resource.BaseResource.id_field`.
@@ -100,6 +103,8 @@ class StorageBase(object):
 
         :param str collection_id: the collection id.
         :param str parent_id: the collection parent.
+        :param request: Optional current request object.
+        :type request: :class:`~pyramid:pyramid.request.Request`
 
         :param dict object: the object to create.
 
@@ -111,7 +116,7 @@ class StorageBase(object):
     def get(self, collection_id, parent_id, object_id,
             id_field=DEFAULT_ID_FIELD,
             modified_field=DEFAULT_MODIFIED_FIELD,
-            auth=None):
+            request=None):
         """Retrieve the object with specified `object_id`, or raise error
         if not found.
 
@@ -119,6 +124,8 @@ class StorageBase(object):
 
         :param str collection_id: the collection id.
         :param str parent_id: the collection parent.
+        :param request: Optional current request object.
+        :type request: :class:`~pyramid:pyramid.request.Request`
 
         :param str object_id: unique identifier of the object
 
@@ -130,7 +137,7 @@ class StorageBase(object):
     def update(self, collection_id, parent_id, object_id, object,
                unique_fields=None, id_field=DEFAULT_ID_FIELD,
                modified_field=DEFAULT_MODIFIED_FIELD,
-               auth=None):
+               request=None):
         """Overwrite the `object` with the specified `object_id`.
 
         If the specified id is not found, the object is created with the
@@ -144,6 +151,8 @@ class StorageBase(object):
 
         :param str collection_id: the collection id.
         :param str parent_id: the collection parent.
+        :param request: Optional current request object.
+        :type request: :class:`~pyramid:pyramid.request.Request`
 
         :param str object_id: unique identifier of the object
         :param dict object: the object to update or create.
@@ -157,7 +166,7 @@ class StorageBase(object):
                with_deleted=True, id_field=DEFAULT_ID_FIELD,
                modified_field=DEFAULT_MODIFIED_FIELD,
                deleted_field=DEFAULT_DELETED_FIELD,
-               auth=None):
+               request=None):
         """Delete the object with specified `object_id`, and raise error
         if not found.
 
@@ -173,6 +182,8 @@ class StorageBase(object):
 
         :param str collection_id: the collection id.
         :param str parent_id: the collection parent.
+        :param request: Optional current request object.
+        :type request: :class:`~pyramid:pyramid.request.Request`
 
         :param str object_id: unique identifier of the object
         :param bool with_deleted: track deleted record with a tombstone
@@ -186,11 +197,13 @@ class StorageBase(object):
                    with_deleted=True, id_field=DEFAULT_ID_FIELD,
                    modified_field=DEFAULT_MODIFIED_FIELD,
                    deleted_field=DEFAULT_DELETED_FIELD,
-                   auth=None):
+                   request=None):
         """Delete all objects in this `collection_id` for this `parent_id`.
 
         :param str collection_id: the collection id.
         :param str parent_id: the collection parent.
+        :param request: Optional current request object.
+        :type request: :class:`~pyramid:pyramid.request.Request`
 
         :param filters: Optionnally filter the objects to delete.
         :type filters: list of :class:`cliquet.storage.Filter`
@@ -204,12 +217,14 @@ class StorageBase(object):
     def purge_deleted(self, collection_id, parent_id, before=None,
                       id_field=DEFAULT_ID_FIELD,
                       modified_field=DEFAULT_MODIFIED_FIELD,
-                      auth=None):
+                      request=None):
         """Delete all deleted object tombstones in this `collection_id`
         for this `parent_id`.
 
         :param str collection_id: the collection id.
         :param str parent_id: the collection parent.
+        :param request: Optional current request object.
+        :type request: :class:`~pyramid:pyramid.request.Request`
 
         :param int before: Optionnal timestamp to limit deletion (exclusive)
 
@@ -224,11 +239,13 @@ class StorageBase(object):
                 id_field=DEFAULT_ID_FIELD,
                 modified_field=DEFAULT_MODIFIED_FIELD,
                 deleted_field=DEFAULT_DELETED_FIELD,
-                auth=None):
+                request=None):
         """Retrieve all objects in this `collection_id` for this `parent_id`.
 
         :param str collection_id: the collection id.
         :param str parent_id: the collection parent.
+        :param request: Optional current request object.
+        :type request: :class:`~pyramid:pyramid.request.Request`
 
         :param filters: Optionally filter the objects by their attribute.
             Each filter in this list is a tuple of a field, a value and a
